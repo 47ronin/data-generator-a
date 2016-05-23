@@ -12,7 +12,7 @@ angular.module('dataGenApp')
     ['$scope', '$http', '$q', function ($scope, $http, $q) {
 
     // Initialize everything
-    var wAPIkey    = 'aa2e1ab4b00e266dd4c047b77ee8793d', // forecast.io API key
+    var wAPIkey    = 'FORECAST_API_KEY', // forecast.io API key
 		    targetGeo  = '32.718371,-117.162531', // latitude, longitude
         wOptions   = '&exclude=minutely,hourly,daily,flags', // API exclusions
 		    stationURL = 'https://api.forecast.io/forecast/' + wAPIkey +
