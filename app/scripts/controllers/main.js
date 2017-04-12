@@ -9,7 +9,7 @@
  */
 angular.module('dataGenApp')
   .controller('MainCtrl',
-    ['$scope', '$http', '$q', function ($scope, $http, $q) {
+    ['$scope', '$http', '$filter', '$q', function ($scope, $http, $filter, $q) {
 
     // Initialize everything
     var wAPIkey    = 'FORECAST_API_KEY', // forecast.io API key
@@ -17,13 +17,27 @@ angular.module('dataGenApp')
         wOptions   = '&exclude=minutely,hourly,daily,flags', // API exclusions
 		    stationURL = 'https://api.forecast.io/forecast/' + wAPIkey +
                       '/' + targetGeo + '?callback=JSON_CALLBACK' + wOptions,
-        weather    = $http.jsonp(stationURL);
+        weather    = $http.jsonp(stationURL),
+        iconArray  = [
+			{oIcon: 'clear-day',           wIcon: ''},
+			{oIcon: 'clear-night',         wIcon: ''},
+			{oIcon: 'rain',                wIcon: ''},
+			{oIcon: 'snow',                wIcon: ''},
+			{oIcon: 'sleet',               wIcon: ''},
+			{oIcon: 'wind',                wIcon: ''},
+			{oIcon: 'fog',                 wIcon: ''},
+			{oIcon: 'cloudy',              wIcon: ''},
+			{oIcon: 'partly-cloudy-day',   wIcon: ''},
+			{oIcon: 'partly-cloudy-night', wIcon: ''}
+		];
 
     // Retrieve weather data
     $q.all([weather])
     .then(function (promise) {
       var wRaw = promise[0].data.currently;
+      var searchIcon = $filter('filter')(iconArray, {oIcon: wRaw.icon});
       $scope.wTemp = Math.round(wRaw.temperature);
+      $scope.wIcon = searchIcon[0].wIcon;
       $scope.wSummary = wRaw.summary;
       if (promise[0].data.alerts) {
         $scope.wAlert = promise[0].data.alerts[0].description.replace(/\\n/g,' ');
@@ -35,7 +49,8 @@ angular.module('dataGenApp')
       var payLoad = {
         wTemp    : $scope.wTemp,
         wSummary : $scope.wSummary,
-        wAlert   : $scope.wAlert
+        wAlert   : $scope.wAlert,
+        wIcon    : $scope.wIcon
       };
       $http({
         method: 'POST',
@@ -70,8 +85,11 @@ angular.module('dataGenApp')
       var sRaw = promise[0].data;
       $scope.stockQuote = parseFloat(Math.round(sRaw.LastPrice * 100) / 100).toFixed(2);
       if (sRaw.Change >= 0) {
-        $scope.stockChange = '+' + parseFloat(Math.round(sRaw.Change * 100) / 100).toFixed(2);
+        $scope.stockChangeIcon = '';
+        $scope.stockChange = parseFloat(Math.round(sRaw.Change * 100) / 100).toFixed(2);
+        $scope.stockChangeE = '+' + $scope.stockChange;
       } else {
+        $scope.stockChangeIcon = '';
         $scope.stockChange = parseFloat(Math.round(sRaw.Change * 100) / 100).toFixed(2);
       }
       if (sRaw.ChangePercent >=0) {
@@ -83,7 +101,9 @@ angular.module('dataGenApp')
       // Push data to PHP processor
       var payLoad = {
         stockQuote   : $scope.stockQuote,
+        stockChangeI : $scope.stockChangeIcon,
         stockChange  : $scope.stockChange,
+        stockChangeE : $scope.stockChangeE,
         stockChangeP : $scope.changePercent
       };
       $http({
