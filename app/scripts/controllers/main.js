@@ -90,7 +90,8 @@ angular.module('dataGenApp')
         $scope.stockChangeE = '+' + $scope.stockChange;
       } else {
         $scope.stockChangeIcon = '';
-        $scope.stockChange = parseFloat(Math.round(sRaw.Change * 100) / 100).toFixed(2);
+        $scope.stockChange = parseFloat(Math.round(Math.abs(sRaw.Change) * 100) / 100).toFixed(2);
+        $scope.stockChangeE = parseFloat(Math.round(sRaw.Change * 100) / 100).toFixed(2);
       }
       if (sRaw.ChangePercent >=0) {
         $scope.changePercent = '+' + sRaw.ChangePercent.toFixed(2) + '%';
